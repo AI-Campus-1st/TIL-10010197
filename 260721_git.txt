@@ -1,0 +1,4 @@
+저장소에 올리기 
+git add 파일들 (모든 파일 '.')
+git commit -m"기록 메세지"
+git push origin master(main)
