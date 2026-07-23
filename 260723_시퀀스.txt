@@ -1,0 +1,52 @@
+#1
+s = input("문자열을 입력하세요:")
+
+cnt_a = s.count('a')
+cnt_e = s.count('e')
+cnt_i = s.count('i')
+cnt_o = s.count('o')
+cnt_u = s.count('u')
+
+cnt = cnt_a + cnt_e +cnt_i +cnt_o +cnt_u 
+
+print(cnt)
+
+#2
+n = int(input ("가로의 길이를 입력하세요:"))
+m = int(input ("세로의 길이를 입력하세요:"))
+
+star = ('*'*n + '\n') * m
+print(star)
+
+#3
+
+
+#sorted 함수의 경우
+import random
+
+
+nums = list(range(1, 24))
+presenter = random.sample(nums, 4)
+
+
+# 원본은 그대로 두고 정리한 결과를 돌려줌 
+sorted_nums = sorted(presenter)
+print(presenter) # 원본은 그대로
+print(sorted_nums) # 새로 정렬된 리스트가 반환
+
+
+#sort 경우
+import random
+
+
+nums = list(range(1, 24))
+presenter = random.sample(nums, 4)
+
+sorted_nums = presenter.sort() #정렬만 하고 따로 반환하는 건 없음
+print(presenter) 
+print(sorted_nums) # None
+
+
+sorted 함수는 기존의 리스트를 유지한 채, 새로 정렬된 리스트를 반환한다. 
+sort 함수는 기존의 리스트를 정렬하고, 반환하는 리스트는 없다. 
+
