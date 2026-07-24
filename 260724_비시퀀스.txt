@@ -1,0 +1,40 @@
+#1 
+
+a = [1, 2, 3, 4, 5]
+b = a
+
+a[2] = 5
+
+print(a)
+print(b)
+#동일하다. list의 주소를 공유하고 있음. 
+
+#2
+
+scores = {'python':80, 'algorithm':90, 'django':89, 'web':83}
+
+sub_size = len(scores)
+my_score = 0
+avg  = 0
+
+for value in scores.values():
+    my_score += value
+
+avg = my_score/sub_size
+print(f'평균점수는 {avg}입니다.')
+
+#3
+
+# 여러 사람의 혈액형(A, B, AB, O)에 대한 정보가 담긴 bloods를 전달 받아, key는 혈액형, value는 사람 수인 dictionary를 만드시오.
+bloods = [
+    'A', 'B', 'A', 'O', 'AB', 'AB',
+    'O', 'A', 'B', 'O', 'B', 'AB',
+] # => {'A': 3, 'B': 3, 'O':  3, 'AB': 3}
+
+counter = {}
+for title in bloods: 
+    #현재 몇 개 가지고 있어? 
+    now_cnt = counter.get(title,0)
+    counter[title] =now_cnt +1
+counter
+
