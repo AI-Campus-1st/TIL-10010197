@@ -1,0 +1,59 @@
+#1
+
+# 재귀 함수를 사용했을 때 얻을 수 있는 장점과 단점을 반복문과 비교하여 작성하시오.
+
+def fact (n): #n이라는 변수가 있다고 가정함 
+        ans = 1
+    for i in range(1,n+1):
+        ans *=i
+
+    return ans
+
+
+
+def factorial(n):
+    
+    if n==1:
+        return 1
+        return factorial(n-1)*n
+
+# 반복문과 비교했을 때 재귀함수의 장점
+## 변수 사용을 줄일 수 있다. 
+## 코드 읽는 것이 비교적 간단하고, 가독성이 높다. 
+
+#반복문과 비교했을 때 재귀함수의 단점
+## 계산이 누적되어 stack이 쌓여 메모리가 낭비된다. 
+# ##연산 시간이 길어진다. 
+
+
+
+
+#2
+#다음의 요구사항을 만족하는 Circle 클래스를 정의하고, 넓이와 둘레, 중심 좌표를 구하는 메서드를 정의하시오.
+
+# 반지름: 3, x좌표: 2, y좌표: 4
+
+class Circle:
+
+    def __init__ (self,r,x,y):
+        self.r = r
+        self.x= x
+        self.y= y
+
+
+
+    def area(self):
+        print(3.14*self.r*self.r)
+
+    def circumference(self):
+        print(2*3.14*self.r)
+
+    def center(self):
+        print(self.x,self.y)
+
+
+c1 = Circle(3, 2, 4)
+
+c1.area() #=> 28.26
+c1.circumference() #=> 18.84
+c1.center() #=> (2, 4)
