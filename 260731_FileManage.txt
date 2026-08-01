@@ -1,0 +1,72 @@
+#1
+SUBJECTS = ["kor", "eng", "math"]
+# 먼저 오류 0으로 전환하기 
+# #\n 없애기 
+
+def scoring(name, columns, lines):# 정답 참조
+    try:
+        return int(lines)
+    except ValueError:
+        print(f"[처리] {name} - {columns} 값 오류({lines}) → 0점 처리")
+        return 0
+    
+students = []
+with open('scores.csv', 'r') as f:
+	columns = f.readline().split(',')
+
+	for line in f.readlines(): #답안 참조
+		temp = line.split(',')
+		name = temp.pop(0)
+		scores = [scoring(name, s, temp[i]) for i, s in enumerate(SUBJECTS)]
+
+		students.append({
+			'name': name,
+			'avg': round(sum(scores)/len(scores), 1)
+		})
+# w - 새로 파일 생성
+# a - 기존 파일 유지, 이어서 기록
+with open('avg_scores.csv', 'w') as f:
+    # 1. 파일에 뭔가를 쓴다 -> 텍스트 -> str
+    # 2. 줄바꿈이 자동으로 들어가지 않음
+    # 칼럼부터 작성
+    f.write('name, avg \n')
+    for student in students:
+        name = student['name']
+        avg = student ['avg']
+        f.write(f'{name},{avg}\n')
+
+
+
+#2 
+import json
+members = []
+errors = []
+
+with open('members.csv', 'r') as f:
+	columns = f.readline().rstrip().split(',')
+
+	for num, data in enumerate(f.readlines(), start =2):
+		id, name, age = data.split(',')
+		try: 
+			if name == "":
+				raise ValueError('name 비어있음')
+			member = dict(zip(columns, [int(id), name, int(age)]))
+			members.append(member)
+
+		except ValueError as e: 
+			errors.append(f'{num}행: {e}')
+
+ 
+# w - 새로 파일 생성
+# a - 기존 파일 유지, 이어서 기록
+with open('product.json', 'w') as f:
+    json.dump(members, f, ensure_ascii=False, indent = 2)
+    # 1. 파일에 뭔가를 쓴다 -> 텍스트 -> str
+    # 2. 줄바꿈이 자동으로 들어가지 않음
+    
+    if errors:
+        with open('errors.log', 'w') as f:
+            f.write("\n".join(errors))
+
+print(f'성공 {len(members)}건 / 실패 {len(errors)}건')
+
