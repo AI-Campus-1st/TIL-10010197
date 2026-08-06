@@ -1,0 +1,138 @@
+#1 Numpy 배열로 5명 학생의 4과목 성적표를 만들고 축(axis) 기준 통계를 산출하시오.
+
+scores = [88, 92, 79, 95,
+          75, 68, 82, 70,
+          92, 99, 95, 88,
+          60, 72, 65, 58,
+          85, 80, 78, 90]
+
+#1-1) 위 리스트를 5행 4열 ndarray로 변환하고 shape, ndim, size, dtype을 출력하시오.
+import numpy as np
+
+scores = np.array(scores).reshape(5,4)
+print(f'{scores.ndim}, {scores.shape}, {scores.size}, {scores.dtype}')
+
+# 1-2) 학생 별 평균과 과목 별 평균을 각각 구하시오.
+std_mean = np.mean(scores, axis =1)
+sub_mean = np.mean(scores, axis =0)
+print(f'학생 평균 {std_mean}, 과목 평균 {sub_mean}')
+
+# 1-3) 전체에서 가장 높은 점수와 그 점수가 몇 번째 학생·몇 번째 과목인지 구하시오.
+print(f'가장 높은 점수는 {np.argmax(scores)//len(scores)+1}번째 학생의 {np.argmax(scores)%len(scores)}번째 과목')
+
+# 1-4) 전체 평균, 표준편차, 분산을 구하시오.
+print(f'전체 평균: {scores.mean()}')
+print(f'전체 분산: {scores.var()}')
+print(f'전체 표준편차: {scores.std()}')
+
+# 1-5) 평균이 80점 이상인 학생의 인덱스와 인원수를 구하고, 해당 학생들의 성적만 잘라내어 출력하시오.
+
+x = std_mean >= 80
+print(np.where(x)[0], np.sum(x))   
+print(scores[x])
+
+
+# 1-6) 90점 이상인 점수의 개수, 100점 이상인 점수가 하나라도 있는지, 모든 점수가 60점 이상인지를 판별하시오.
+print(np.sum(scores >=90), np.any(scores>=100),  np.all(scores>=60))
+
+
+# 1-7) #90점 이상은 'A', 80점 이상은 'B', 나머지는 'C'로 변환한 등급 배열을 만드시오.
+
+
+grade = np.where(scores >= 90, 'A', np.where(scores >= 80, 'B', 'C'))
+print(grade)
+
+# 2  8x8 난수 배열을 흑백 이미지로 가정하고 슬라이싱, 이진화, 좌우반전을 구현하시오.
+
+
+# 2-1)생성한 img를 출력하시오.
+print(img)
+
+# 2-2)이미지 정중앙의 4×4 영역만 잘라내어 출력하시오.
+
+print(img[2:6, 2:6])
+
+# 2-3) 짝수 번째 행(0, 2, 4, 6행)만 뽑아내시오.
+
+print(img[::2]) #시작점 끝점 스텝
+
+# 2-4) 128 이상인 픽셀은 255(흰색), 미만인 픽셀은 0(검은색)으로 바꾼 이진화 배열을 만드시오.
+bnw = np.where(img >= 128, 255, 0)
+bnw
+
+# 2-5) 이진화 결과에서 흰색 픽셀과 검은색 픽셀의 개수를 각각 세시오.
+print(np.sum(bnw == 255), np.sum(bnw == 0))
+
+# 2-6) 원본 이미지를 좌·우 절반으로 분할하시오.
+left, right = np.split(img,2, axis= 1)
+left, right
+
+# 2-7. 분할한 두 조각의 순서를 바꿔 다시 이어 붙여 좌우가 뒤바뀐 이미지를 만드시오.
+reverse = reverse = np.concatenate([right, left], axis=1)
+print(reverse)
+
+#2-8. 원본 이미지를 1차원으로 펼친 뒤 앞 10개 값과 shape을 출력하시오.
+oneD = img.ravel()
+oneD
+print(oneD[:10], flat.shape)
+
+# 2-9) 128 이상인 픽셀만 골라내어 그 개수와 평균값을 구하시오.
+
+picked = img[img >= 128]
+print(picked.size, np.mean(picked)) 
+
+#3
+sales = np.array([[120,  80,  45,  60],     # A지점
+                  [200, 150,  90,  30],     # B지점
+                  [ 75,  60, 120,  95]])    # C지점
+price = np.array([1500, 3000, 5000, 2000])  # 제품 1~4 단가
+
+
+# 3-1)  브로드캐스트를 이용해 각 지점의 제품별 매출액(수량 × 단가) 행렬을 구하시오
+
+print(sales * price)
+
+#3-2
+print(sales@price)
+print(np.sum(sales, axis =0))
+
+#3-3
+print(sales -np.mean(sales,axis =0))
+
+
+#3-4
+# 4 각 지점을 기준으로 판매량을 정규화하시오. 
+# 결과의 행별 평균이 0, 표준편차가 1이 되는지 확인하시오. <-표준화
+
+avg = np.mean(sales, axis=1, keepdims=True)   
+s = np.std(sales, axis=1, keepdims=True)   
+z = (sales - avg) / s
+print(np.round(z, 2))
+print(np.mean(z, axis=1), np.std(z, axis=1))   
+
+#3-5
+#5
+sales_T = sales.T
+
+print(sales_T)
+
+
+#3-6
+#6. sales의 앞 3개 열만 잘라 3×3 정방행렬 A를 만들고, 행렬식과 역행렬을 구하시오. 
+# 이어서 A와 역행렬을 곱해 단위행렬이 나오는지 확인하시오.
+A = sales[:, :3]
+A
+print(np.linalg.det(A))            
+inv = np.linalg.inv(A)
+print(np.round(A.dot(inv), 6))    
+
+#3-7
+#7. 총매출이 가장 높은 지점의 인덱스와, 지점 순서대로의 누적 매출을 구하시오.
+total = sales.dot(price)
+print(np.argmax(total))            
+print(np.cumsum(total))
+
+
+
+
+
