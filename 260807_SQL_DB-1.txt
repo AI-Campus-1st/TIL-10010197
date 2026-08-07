@@ -1,0 +1,60 @@
+--과제 01
+
+CREATE DATABASE shopping_db
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+
+USE shopping_db;
+
+CREATE TABLE users(
+    users_id INT NOT NULL AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    email  VARCHAR(100) NOT NULL UNIQUE, 
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(users_id)
+);
+
+CREATE TABLE products(
+    product_id INT NOT NULL AUTO_INCREMENT,
+    product_name VARCHAR(100) NOT NULL,
+    price  INT NOT NULL DEFAULT 0, 
+    stock_quantity INT NOT NULL DEFAULT 0,
+    PRIMARY KEY(product_id)
+);
+
+
+ALTER TABLE users ADD COLUMN phone VARCHAR(20);
+
+
+--과제 02
+
+USE shopping_db;
+
+INSERT INTO users(username, email,phone )
+    VALUES ('김철수', 'chulsoo@test.com', NULL),
+    ('강영현', 'youngk@test.com', '010-9393-1219'),
+    ('오탄희', 'homerun@test.com', '010-7755-0520');
+
+INSERT INTO products (product_name, price, stock_quantity) 
+VALUES
+    ('무선 마우스', 25000, 50),
+    ('기계식 키보드', 89000, 30),
+    ('4K 모니터', 350000, 10),
+    ('USB 허브', 15000, 100);
+
+UPDATE users SET phone = '010-1234-5678' WHERE email = 'chulsoo@test.com';
+
+--과제 03
+
+SELECT DISTINCT stock_quantity
+FROM products;
+
+SELECT product_name, price
+FROM products
+ORDER BY price DESC ;
+
+SELECT username, email, phone
+FROM users
+ORDER BY users_id DESC
+LIMIT 2;
