@@ -1,0 +1,189 @@
+--[기본]
+--Q1.
+SELECT customer_name, grade
+FROM tb_customer
+WHERE city = '서울';
+--Q2
+SELECT *
+FROM tb_customer
+WHERE customer_name LIKE '이%';
+--Q3 
+SELECT *
+FROM tb_product
+WHERE unit_price >=5000 AND unit_price <=50000 
+ORDER BY unit_price;
+--Q4
+SELECT*
+FROM tb_order
+WHERE order_dt >= '2024-04-01'
+    AND order_dt < '2024-07-01';
+--Q5
+SELECT *
+FROM tb_customer
+WHERE grade IS NULL;
+
+--[집계]
+--Q6
+SELECT category_id, COUNT(*) AS 상품수, AVG(unit_price) AS m
+FROM tb_product
+GROUP BY category_id
+ORDER BY AVG(unit_price) DESC ;
+--Q7
+SELECT grade, COUNT(*) AS 고객수, 
+    (SELECT COUNT(*) FROM tb_customer) AS 전체고객수,
+    COUNT(*)/(SELECT COUNT(*) FROM tb_customer) * 100 AS 백분위  
+FROM tb_customer
+GROUP BY grade; 
+
+--Q8
+SELECT m, cnt 
+FROM (
+    SELECT DATE_FORMAT(order_dt, '%Y-%m') AS m, 
+    COUNT(*) AS cnt
+    FROM tb_order
+    GROUP BY MONTH(order_dt) 
+) AS monthly_order 
+WHERE cnt; 
+--Q9 
+SELECT category_id, SUM(stock_qty)
+FROM tb_product
+GROUP BY category_id
+HAVING SUM(stock_qty) <100
+;
+--Q10
+SELECT (MAX(unit_price)-MIN(unit_price)) AS 가격차이, 
+    MAX(unit_price) AS 가장비싼상품,
+    MIN(unit_price) AS 가장싼상품
+FROM tb_product; 
+
+--Q11
+SELECT c.customer_name, DATE_FORMAT(o.order_dt, '%Y-%m'), SUM(od.amount)
+FROM tb_order AS o
+    JOIN tb_customer AS c ON o.customer_id = c.customer_id
+    JOIN v_order_detail AS od ON od.order_id=o.order_id 
+GROUP BY o.order_id
+;
+--Q12
+SELECT c.*
+FROM tb_customer AS c
+    LEFT JOIN tb_order AS o ON c.customer_id = o.customer_id
+WHERE o.order_id IS NULL;
+
+--Q13
+SELECT p.*
+FROM tb_product AS p
+    LEFT JOIN tb_order_item AS oi ON p.product_id = oi.product_id
+WHERE oi.product_id IS NULL;
+
+--Q14
+SELECT c.customer_name, 
+    SUM(oi.qty*oi.unit_price) AS 구매금액합
+FROM  tb_order_item AS oi
+    JOIN tb_order AS o ON oi.order_id = o.order_id
+    JOIN tb_customer AS c ON o.customer_id=c.customer_id
+WHERE o.status <> 'CANCELED'
+GROUP BY c.customer_id
+ORDER BY 구매금액합 DESC
+LIMIT 5;
+
+--Q15
+SELECT cu.country, c.category_name, SUM(oi.qty*oi.unit_price) AS 매출
+    
+FROM tb_category AS c
+            JOIN tb_product AS p ON p.category_id = c.category_id
+            JOIN tb_order_item AS oi ON oi.product_id=p.product_id
+            JOIN tb_order AS o ON o.order_id = oi.order_id
+            JOIN tb_customer AS cu ON cu.customer_id= o.customer_id   
+WHERE o.status <> 'CANCELED'
+GROUP BY cu.country, p.category_id
+ORDER BY SUM(oi.qty*oi.unit_price) DESC;
+
+--Q16
+SELECT c.category_name, COUNT(product_id) AS 상품수,
+    CASE
+        WHEN COUNT(*) > 3 THEN '많음'
+        ELSE '적음'
+    END AS 수준 
+FROM tb_category AS c 
+    JOIN tb_product AS p ON p.category_id=c.category_id
+GROUP BY c.category_id
+ORDER BY 상품수 DESC;
+
+--Q17
+SELECT 
+    
+    CASE
+        WHEN COUNT(*)= 0 THEN '0건' --먼저 빠질 조건 파악 (덮어씌어짐 방지)
+        WHEN COUNT(*) <=2 THEN '1-2건'
+        ELSE '3건 이상'
+    END AS dist, COUNT(*) AS customers 
+FROM ( 
+    SELECT tb_order AS o
+    JOIN tb_customer AS c ON o.customer_id =c.customer_id
+    JOIN tb_order_item AS oi ON oi.order_id= o.order_id
+    )
+WHERE o.status <> 'CANCELED'
+GROUP BY c.customer_id
+ORDER BY 구매액 DESC
+LIMIT 5;
+
+--Q18
+SELECT YEAR(o.order_dt) AS yr,
+    SUM(CASE WHEN MONTH(o.order_dt)=1 THEN oi.qty*oi.unit_price ELSE 0 END) AS m01,
+    SUM(CASE WHEN MONTH(o.order_dt)=2 THEN oi.qty*oi.unit_price ELSE 0 END) AS m02,
+    SUM(CASE WHEN MONTH(o.order_dt)=3 THEN oi.qty*oi.unit_price ELSE 0 END) AS m03,
+    SUM(CASE WHEN MONTH(o.order_dt)=4 THEN oi.qty*oi.unit_price ELSE 0 END) AS m04,
+    SUM(CASE WHEN MONTH(o.order_dt)=5 THEN oi.qty*oi.unit_price ELSE 0 END) AS m05,
+    SUM(CASE WHEN MONTH(o.order_dt)=6 THEN oi.qty*oi.unit_price ELSE 0 END) AS m06,
+    SUM(CASE WHEN MONTH(o.order_dt)=7 THEN oi.qty*oi.unit_price ELSE 0 END) AS m07,
+    SUM(CASE WHEN MONTH(o.order_dt)=8 THEN oi.qty*oi.unit_price ELSE 0 END) AS m08,
+    SUM(CASE WHEN MONTH(o.order_dt)=9 THEN oi.qty*oi.unit_price ELSE 0 END) AS m09,
+    SUM(CASE WHEN MONTH(o.order_dt)=10 THEN oi.qty*oi.unit_price ELSE 0 END) AS m10,
+    SUM(CASE WHEN MONTH(o.order_dt)=11 THEN oi.qty*oi.unit_price ELSE 0 END) AS m11,
+    SUM(CASE WHEN MONTH(o.order_dt)=12 THEN oi.qty*oi.unit_price ELSE 0 END) AS m12
+FROM tb_order o
+        JOIN tb_order_item oi ON o.order_id = oi.order_id
+WHERE o.status <> 'CANCELED'
+GROUP BY YEAR(o.order_dt);
+--Q19
+SELECT cat.category_name, p.product_name, 
+        IFNULL(SUM(oi.qty),0), p.stock_qty, 
+        ROUND(IFNULL(SUM(oi.qty),0)/(IFNULL(SUM(oi.qty),0)+p.stock_qty)*100,1) AS 소진율
+FROM tb_category AS cat
+    LEFT JOIN tb_product AS p ON p.category_id=p.category_id
+    LEFT JOIN tb_order_item AS oi ON p.product_id = oi.product_id
+    LEFT JOIN tb_order AS o ON oi.order_id = o.order_id
+WHERE o.status <> 'CANCELED'
+GROUP BY p.product_id, cat.category_name, p.product_name, p.stock_qty --GROUP BY 빠지면 상품 하나만 나타남
+ORDER BY 소진율 DESC; 
+
+--Q20
+SELECT c.customer_name AS 고객명, c.country AS 국가명, o.order_dt AS 주문일, (oi.qty*oi.unit_price) AS 취소금액, COUNT(*) AS 담긴상품개수
+FROM tb_customer AS c
+    LEFT JOIN tb_order AS o ON o.customer_id=c.customer_id
+    LEFT JOIN tb_order_item AS oi ON oi.order_id =o.order_id
+WHERE o.status = 'CANCELED'
+GROUP BY o.order_id, c.customer_name, c.country, DATE(o.order_dt)
+ORDER BY 취소금액 DESC;
+--답지참조
+SELECT COUNT(DISTINCT o.order_id) AS 취소건수,
+       SUM(oi.qty * oi.unit_price) AS 취소총액
+FROM tb_order AS o
+    JOIN tb_order_item AS oi ON o.order_id = oi.order_id
+WHERE o.status = 'CANCELED';
+
+
+
+--Q21  
+SELECT IFNULL(c.grade, '미지정') AS 등금, 
+    COUNT(DISTINCT c.customer_id), 
+    COUNT(DISTINCT o.customer_id) AS 주문한인원, 
+    IFNULL(SUM(oi.qty*oi.unit_price),0) AS 총매출, 
+    ROUND(IFNULL(SUM(oi.qty * oi.unit_price), 0)--답지참고
+            / COUNT(DISTINCT c.customer_id)) AS 일인당평균 
+FROM tb_customer AS c
+    LEFT JOIN tb_order AS o ON o.customer_id=c.customer_id
+        AND o.status <> 'CANCELED'-- 답치 참고: 취소 조건은 ON 절에 작성합니다. WHERE 로 옮기면 주문 없는 고객이 사라집니다 
+    LEFT JOIN tb_order_item AS oi ON o.order_id =oi.order_id
+GROUP BY IFNULL(c.grade, '미지정') 
+ORDER BY 일인당평균 DESC; 
