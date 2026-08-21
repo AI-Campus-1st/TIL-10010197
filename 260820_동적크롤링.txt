@@ -1,0 +1,108 @@
+#1
+import json 
+import requests
+URL = 'https://ac.search.naver.com/nx/ac'
+PARAMS={
+    
+    'q_enc': 'UTF-8',
+    'st': '100',
+    #'_callback': '_jsonp_9'
+        
+    }
+
+def get_related_keywords(keyword):
+    res = requests.get(URL, params={**PARAMS, 'q':keyword})
+    data= res.json()
+
+    related_keywords = []
+    for item in data['items'][0]: #대괄호 하나 지우기 
+        related_keywords.append(item[0])
+    return related_keywords
+
+get_related_keywords('부트캠프')
+
+#2
+import requests
+
+
+URL = 'https://comic.naver.com/api/webtoon/titlelist/weekday?order=user'
+
+res =requests.get(URL, params={'order':'user'})
+res.raise_for_status()
+res.status_code
+res.json()['titleListMap'].keys()
+res.json()['titleListMap']['MONDAY']
+#변환 방법1. 함수
+def get_dow_eng2kor(dow_eng):
+    match dow_eng:
+        case 'MONDAY':
+            return '월'
+        case 'TUESDAY':
+            return '화'
+        case 'WEDNSDAY':
+            return '수'
+        case 'THURSDAY':
+            return '목'
+        case 'FRIDAY':
+            return '금'
+        case 'SATURDAY':
+            return '토'
+        case 'SUNDAY':
+            return '일'
+    return None #요일을 한글로 변환함수 
+
+webtoons = []
+for dow, items in res.json()['titleListMap'].items():
+    print(dow, end=' ')
+    print(len(items))
+
+    for item in items:
+        link = 'https://comic.naver.com/webtoon/list?titleId={}'.format(item.get('titleId'))
+        webtoons.append({
+            '제목':item.get('titleName'),
+            '링크': link,#url 바꿔보면서 필요있는 파라미터인지 판단하기 
+            '요일': get_dow_eng2kor(dow) #바깥의 요일 정보 활용 -> 변환해서 딕셔너리 
+        })
+import pandas as pd
+pd.DataFrame(webtoons).to_csv('naver_webtoon.csv', index=None)
+webtoons
+webtoons
+
+#3
+import requests
+URL = 'https://www.saramin.co.kr/zf_user/jobs/public/list'
+res = requests.get(URL, params={'page':2,'isAjaxRequest':'y'},
+                        headers={'User-Agent':'Mozilla.5.0',
+                                 'x-requested-with':'XMLHttpRequest'})
+
+res.raise_for_status() #요청 자체는 잘 넣은 것 같은데 이상한 응답이 온다 -> header 추가하기 잘 찾았고, 검증까지 했다는 전제 하 
+res.status_code #요청자체가 잘못됐을 때 
+
+#parse
+from bs4 import BeautifulSoup
+# print(res.json()['innerHTML'])
+
+soup = BeautifulSoup(res.json()['innerHTML'])
+
+items = soup.select('.list_item')
+#select에서 없는 앧 ㅗ있을 수 있으니까 
+def get_text(tag):
+    return tag.text.strip() if tag else ''
+
+
+recruits = []
+for item in items:
+    job_title_tag = item.select_one('.job_tit a')
+    recruits.append({
+        '기업명': get_text(item.select_one('.company_nm .str_tit')),
+        '그룹사' : get_text(item.select_one('.company_nm .main')),
+        '기업종류' : get_text(item.select_one('.company_nm .info_stock')),
+        '공고명' : get_text(item.select_one('.job_tit a')),
+        '직무키워드' : [get_text(span_tag) for span_tag in item.select('.job_sector span')],
+        #안에 html있을 경우 어떻게 확인할 것인가 elements tap 확인 구조 분석, 어디에 있는지 찾아본다음에 하나씩 찾아서 정리하면 됨
+
+        '학력': get_text(item.select_one('.education')),
+        '경력구분': get_text(item.select_one('.career')),
+        '근무지': get_text(item.select_one('.work_place')),
+
+    })
